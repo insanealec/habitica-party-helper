@@ -34,7 +34,7 @@ export default {
 	mounted() {
 		firebase.auth().onAuthStateChanged(user => {
 			if (user) {
-				this.$bind('user', db.collection('users').where('User_ID', '==', user.uid));
+				this.$bind('user', db.collection('users').doc(user.uid));
 			}
 		})
 	},
