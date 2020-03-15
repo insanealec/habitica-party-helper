@@ -1,7 +1,10 @@
 <template>
 	<div class="home">
-		<div v-if="user.API_USER == ''">
-			<!--  -->
+		<div v-if="hasUserData">
+			<p>Has User Data.</p>
+		</div>
+		<div v-else>
+			<p>Does not have User Data.</p>
 		</div>
 	</div>
 </template>
@@ -13,17 +16,22 @@ export default {
 	name: 'Home',
 	data () {
 		return {
-			users: [],
-			user: {},
+			// users: [],
+			userData: {},
 		};
 	},
 	firestore() {
 		return {
-			users: db.collection('users'),
+			// users: db.collection('users'),
 		};
 	},
 	computed: {
-		//
+		hasUserData() {
+			return this.userData != null && this.userData.API_USER != '';
+		},
+		user() {
+			return this.$store.getters.user;
+		},
 	},
 	watch: {
 		//
@@ -32,11 +40,16 @@ export default {
 		//
 	},
 	mounted() {
-		firebase.auth().onAuthStateChanged(user => {
-			if (user) {
-				this.$bind('user', db.collection('users').doc(user.uid));
+		if (this.user != null) {
+			this.$bind('userData', db.collection('users').doc(this.user.uid));
+			if (this.userData == null) {
+				//No user data has been saved yet
+				this.userData = {
+					API_USER: "",
+					API_KEY: "",
+				};
 			}
-		})
+		}
 	},
 }
 </script>
