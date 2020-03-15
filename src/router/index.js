@@ -4,6 +4,7 @@ import firebase from 'firebase';
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
+import store from '../store/index.js'
 
 Vue.use(VueRouter)
 
@@ -41,27 +42,36 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-	let currentUser = firebase.auth().currentUser
-	console.log(currentUser)
 	if (to.matched.some(record => record.meta.requiresAuth)) {
-		if (!currentUser) {
-			next({
-				path: '/login',
-				query: { redirect: to.fullPath }
-			})
-		} else {
-			next()
-		}
+		firebase.auth().onAuthStateChanged(user => {
+			if (!user) {
+				next({
+					path: '/login',
+					query: { redirect: to.fullPath }
+				});
+			} else {
+				store.commit('user', user);
+				next();
+			}
+		});
 	} else if (to.matched.some(record => record.meta.redirectIfLogged)) {
-		if (currentUser) {
-			next({
-				path: '/'
-			})
-		} else {
-			next()
-		}
+		firebase.auth().onAuthStateChanged(user => {
+			if (user) {
+				store.commit('user', user);
+				next({
+					path: '/'
+				});
+			} else {
+				next();
+			}
+		});
 	} else {
-		next()
+		firebase.auth().onAuthStateChanged(user => {
+			if (user) {
+				store.commit('user', user);
+			}
+			next();
+		});
 	}
 })
 
