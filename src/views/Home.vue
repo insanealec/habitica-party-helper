@@ -36,38 +36,61 @@ export default {
 		hasUserData() {
 			return this.userData != null && this.userData.API_USER != '';
 		},
+		userID() {
+			return this.userData.API_USER;
+		},
 		user() {
 			return this.$store.getters.user;
+		},
+		habitica() {
+			return this.$store.getters.habitica;
 		},
 	},
 	watch: {
 		//
 	},
 	methods: {
-		save() {
+		async save() {
 			db.collection('users')
 				.doc(this.user.uid)
 				.set({
 					API_USER: this.API_USER,
 				})
-				.then(() => {
+				.then(async () => {
 					console.log('success');
-					//Start loading user and party data.
+					//Set the user header to this user.
+					if (!this.hasUserData) {
+						alert('No user set, cannot contact Habitica.');
+						return;
+					}
+					this.loadMember();
 				})
 				.catch((error) => {
 					console.log(error);
 				});
 		},
+		async loadMember() {
+			try {
+				let thing = await this.habitica.request('member', {
+					API_USER: this.userData.API_USER,
+				});
+				console.log(thing)
+			} catch (e) {
+				console.log(e.response);
+			}
+		},
 	},
-	mounted() {
+	async mounted() {
 		if (this.user != null) {
-			this.$bind('userData', db.collection('users').doc(this.user.uid));
-			if (this.userData == null) {
+			await this.$bind('userData', db.collection('users').doc(this.user.uid));
+			if (!this.hasUserData) {
 				//No user data has been saved yet
 				this.userData = {
 					API_USER: "",
 					API_KEY: "",
 				};
+			} else if (this.hasUserData) {
+				this.loadMember();
 			}
 		}
 	},
