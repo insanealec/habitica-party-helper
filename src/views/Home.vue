@@ -52,11 +52,11 @@ export default {
 				})
 				.then(() => {
 					console.log('success');
+					//Start loading user and party data.
 				})
 				.catch((error) => {
 					console.log(error);
 				});
-			//Start loading user and party data.
 		},
 	},
 	mounted() {
