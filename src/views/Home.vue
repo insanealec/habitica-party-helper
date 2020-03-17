@@ -4,7 +4,13 @@
 			<p>Has User Data.</p>
 		</div>
 		<div v-else>
-			<p>Does not have User Data.</p>
+			<div>
+				<label for="API_USER">Enter your Habitica User ID</label>
+				<input type="text" v-model="API_USER">
+			</div>
+			<div>
+				<button @click="save">Save</button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -18,6 +24,7 @@ export default {
 		return {
 			// users: [],
 			userData: {},
+			API_USER: '',
 		};
 	},
 	firestore() {
@@ -37,7 +44,20 @@ export default {
 		//
 	},
 	methods: {
-		//
+		save() {
+			db.collection('users')
+				.doc(this.user.uid)
+				.set({
+					API_USER: this.API_USER,
+				})
+				.then(() => {
+					console.log('success');
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+			//Start loading user and party data.
+		},
 	},
 	mounted() {
 		if (this.user != null) {
